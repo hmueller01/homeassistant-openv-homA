@@ -1,9 +1,9 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
-name: Vcontrol add-on
-version: "1.12.5"
-slug: vcontrold
-description: Vcontrol add-on
-url: "https://github.com/Alexandre-io/homeassistant-vcontrol"
+name: OpenV vcontrold to homA MQTT add-on
+version: "0.1.0"
+slug: openv-homA
+description: OpenV vcontrold to homA MQTT add-on
+url: "https://github.com/hmueller01/homeassistant-openv-homA"
 arch:
   - armhf
   - armv7
@@ -13,9 +13,9 @@ arch:
 init: false
 options:
   tty: "/dev/ttyUSB0"
-  refresh: 30
-  device_id: "2098"
-  mqtt_topic: "openv"
+  refresh: 60
+  device_id: "20CB"
+  mqtt_topic: "123456-vito"
   debug: false
   commands:
     - getTempA:FLOAT

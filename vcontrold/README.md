@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Vcontrol add-on
+# Home Assistant Add-on: OpenV vcontrold to homA MQTT add-on
 
 ![Supports aarch64 Architecture][aarch64-shield]
 ![Supports amd64 Architecture][amd64-shield]
@@ -11,3 +11,5 @@
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
+
+This add-on uses [OpenV](https://github.com/openv)'s [vcontrold Daemon for control and logging of Viessmann® type heating devices](https://github.com/openv/vcontrold) to publish it to [HomA framework](https://github.com/binarybucks/homA) MQTT messages.

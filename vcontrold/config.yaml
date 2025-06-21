@@ -4,8 +4,7 @@ version: "0.1.0"
 slug: openv-homA
 description: Control and monitor your vcontrold compatible heating system using the HomA MQTT framework
 url: "https://github.com/hmueller01/homeassistant-openv-homA"
-#image: "hmueller01/{arch}-homeassistant-vcontrol"
-image: "ghcr.io/hmueller01/openv-homA-addon"
+image: "ghcr.io/hmueller01/{arch}-openv-homA-addon"
 arch:
   - armhf
   - armv7

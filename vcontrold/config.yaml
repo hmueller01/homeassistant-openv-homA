@@ -2,7 +2,7 @@
 name: OpenV vcontrold to HomA MQTT
 version: "1.12.5"
 slug: openv-homA
-description: Control and monitor your vcontrold compatible heating system using the HomA MQTT framework
+description: Connect a Vito heating system using the HomA MQTT framework
 url: "https://github.com/hmueller01/homeassistant-openv-homA"
 #image: "ghcr.io/hmueller01/{arch}-addon-openv-homa" # on https://github.com
 #image: "hmueller01/{arch}-addon-openv-homa" # on https://hub.docker.com

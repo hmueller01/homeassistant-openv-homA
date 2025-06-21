@@ -134,6 +134,16 @@
       <enum bytes="05" text="ABSCHALT"/>
       <enum text="UNKNOWN"/>
     </unit>
+    <unit name="Betriebsart">
+      <abbrev>BA4</abbrev>
+      <type>enum</type>
+      <enum bytes="00" text="Abschalt"/>
+      <enum bytes="01" text="WW"/>
+      <enum bytes="02" text="H+WW"/>
+      <enum bytes="03" text="Dauernd Reduziert"/>
+      <enum bytes="04" text="Dauernd Normal"/>
+      <enum text="UNKNOWN"/>
+    </unit>
     <unit name="SetReturnStatus">
       <abbrev>SR</abbrev>
       <type>enum</type>
@@ -284,123 +294,6 @@
       <enum bytes="03" text="Warmwasser"/>
       <enum text="UNKNOWN"/>
     </unit>
-    <!-- Start aus VScotHO1_unit.xml -->
-    <unit name="Status">
-      <abbrev>E_ST</abbrev>
-      <type>enum</type>
-      <enum bytes="00" text="AUS"/>
-      <enum bytes="01" text="EIN"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="Temperatur">
-      <abbrev>T1U</abbrev>
-      <calc get="V" set="V"/>
-      <type>uchar</type>
-      <entity>Grad Celsius</entity>
-    </unit>
-    <unit name="Betriebsart">
-      <abbrev>E_BA4</abbrev>
-      <type>enum</type>
-      <enum bytes="00" text="Abschalt"/>
-      <enum bytes="01" text="Nur WW"/>
-      <enum bytes="02" text="Heizen und WW"/>
-      <enum bytes="03" text="Dauernd Reduziert"/>
-      <enum bytes="04" text="Dauernd Normal"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="Stunden">
-      <abbrev>HS</abbrev>
-      <calc get="V/3600" set="V*3600"/>
-      <type>uint</type>
-      <entity>Stunden</entity>
-    </unit>
-    <unit name="Funktion">
-      <abbrev>X</abbrev>
-      <type></type>
-    </unit>
-    <unit name="Anzahl">
-      <abbrev>CO</abbrev>
-      <calc get="V" set=""/>
-      <type>int</type>
-    </unit>
-    <unit name="Schaltzeit">
-      <abbrev>CT</abbrev>
-      <calc get="h = &gt;&gt; 3 , m = &amp; 0x7 * 10" set="h &lt;&lt; 3 + m / 10"/>
-      <type>cycletime</type>
-      <entity>Stunden:Minuten</entity>
-    </unit>
-    <unit name="Temperatur">
-      <abbrev>TD</abbrev>
-      <calc get="V/10" set="V*10"/>
-      <type>short</type>
-      <entity>Grad Celsius</entity>
-    </unit>
-    <unit name="Flamme">
-      <abbrev>B_STF</abbrev>
-      <calc get="B2 &amp; (0x01&lt;&lt;BP) &gt;&gt; BP" set=""/>
-      <type>uchar</type>
-      <enum bytes="00" text="AUS"/>
-      <enum bytes="01" text="EIN"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="Verriegelung">
-      <abbrev>B_STV</abbrev>
-      <calc get="B1 &amp; (0x01&lt;&lt;BP) &gt;&gt; BP" set=""/>
-      <type>uchar</type>
-      <enum bytes="00" text="inaktiv"/>
-      <enum bytes="01" text="aktiv"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="Prozent">
-      <abbrev>PC</abbrev>
-      <calc get="V" set="V"/>
-      <type>uchar</type>
-      <entity>Prozent</entity>
-    </unit>
-    <unit name="FerienBetrieg">
-      <abbrev>B_FB</abbrev>
-      <calc get="B7 &amp; (0x01&lt;&lt;BP) &gt;&gt; BP" set=""/>
-      <type>uchar</type>
-      <enum bytes="00" text="inaktiv"/>
-      <enum bytes="01" text="aktiv"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="FrostWarnung">
-      <abbrev>B_FW</abbrev>
-      <calc get="B7 &amp; (0x01&lt;&lt;BP) &gt;&gt; BP" set=""/>
-      <type>uchar</type>
-      <enum bytes="00" text="inaktiv"/>
-      <enum bytes="01" text="aktiv"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="SolarInfo">
-      <abbrev>E_SI</abbrev>
-      <type>enum</type>
-      <enum bytes="00" text="Ohne Solarregelung"/>
-      <enum bytes="01" text="Mit Vitosolic 100"/>
-      <enum bytes="02" text="Mit Vitosolic 200"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <unit name="Prozent">
-      <abbrev>PC1</abbrev>
-      <calc get="V/2" set="V*2"/>
-      <type>uchar</type>
-      <entity>Prozent</entity>
-    </unit>
-    <unit name="DateTime">
-      <abbrev>TI</abbrev>
-      <type>systime</type>
-    </unit>
-    <unit name="StatusUmschaltVentil">
-      <abbrev>E_STUV2</abbrev>
-      <type>enum</type>
-      <enum bytes="00" text="undefiniert"/>
-      <enum bytes="01" text="Heizbetrieb"/>
-      <enum bytes="02" text="Mittelstellung"/>
-      <enum bytes="03" text="Warmwasserbetreitung"/>
-      <enum text="UNKNOWN"/>
-    </unit>
-    <!-- Ende aus VScotHO1_unit.xml -->
   </units>
   <protocols>
     <protocol name="P300">

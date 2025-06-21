@@ -6,7 +6,7 @@
 
 This repository contains the following add-ons
 
-### [OpenV vcontrol to homA add-on](./vcontrold)
+### [OpenV vcontrol to HomA add-on](./vcontrold)
 
 ![Supports aarch64 Architecture][aarch64-shield]
 ![Supports amd64 Architecture][amd64-shield]

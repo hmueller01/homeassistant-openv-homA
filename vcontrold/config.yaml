@@ -1,14 +1,14 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: OpenV vcontrold to HomA MQTT
-version: "1.12.5"
+version: "0.1.0"
 slug: openv-homA
 description: Connect a Vito heating system using the HomA MQTT framework
 url: "https://github.com/hmueller01/homeassistant-openv-homA"
 #image: "ghcr.io/hmueller01/{arch}-addon-openv-homa" # on https://github.com
 #image: "hmueller01/{arch}-addon-openv-homa" # on https://hub.docker.com
 #image: "hmueller01/homeassistant-addon-openv-homa:{arch}" # on https://hub.docker.com
-#image: "hmueller01/homeassistant-addon-openv-homa" # on https://hub.docker.com
-image: "alexandreio/{arch}-homeassistant-vcontrol"
+image: "hmueller01/homeassistant-addon-openv-homa" # on https://hub.docker.com
+#image: "alexandreio/{arch}-homeassistant-vcontrol"
 arch:
   - armhf
   - armv7
@@ -46,7 +46,7 @@ options:
     - getBrennerStarts:FLOAT
     - getBrennerStunden1:FLOAT
     - getBrennerStunden2:FLOAT
-    - getPumpeStatusM1:STRING
+    - getPumpeStatusM1:FLOAT
     - getPumpeStatusSp:STRING
     - getPumpeStatusZirku:STRING
     - getPumpeStatusM2:STRING

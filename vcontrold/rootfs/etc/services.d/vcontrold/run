@@ -9,8 +9,7 @@ declare config_deviceid
 declare config_commands
 declare config_tty
 declare config_file_vito="vito.xml"
-declare config_file_vcontrold="/config/vcontrold/vcontrold.xml"
-declare use_custom_config_file_vcontrold=false
+declare config_file_vcontrold="/etc/vcontrold/vcontrold.xml"
 
 # Fetch Vcontrold settings
 source /etc/services.d/get_vcontrold_settings.sh
@@ -31,7 +30,7 @@ fi
 # Check if custom vcontrold.xml file exists
 if [ -f "/config/vcontrold/vcontrold.xml" ]; then
     bashio::log.info "Using custom vcontrold.xml file."
-    use_custom_config_file_vcontrold=true
+    config_file_vcontrold="/config/vcontrold/vcontrold.xml"
 else
     bashio::log.info "Using default vcontrold.xml file."
 fi
@@ -49,8 +48,13 @@ do
     ((i=i+1))
     cmd=$(echo $command | cut -d':' -f1)
     type=$(echo $command | cut -d':' -f2)
+    topic=$(echo $command | cut -d':' -f3)
 
-    bashio::log.info "Configuring command ${i}: ${cmd} with type ${type}"
+    if [[ $topic == "" ]]; then
+        topic='"$C'$i'"'
+    fi
+
+    bashio::log.info "Configuring command ${i}: ${cmd} with type ${type} using topic ${topic}"
     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt
 
     R='$'$i''
@@ -59,33 +63,25 @@ do
     fi
 
     echo 'if [ "x$E'$i'" = "xOK" ]; then' >> /etc/vcontrold/2_mqtt.tmpl
-    echo '  mosquitto_pub -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PASSWORD -t $MQTT_TOPIC/$C'$i' -m '$R'' >> /etc/vcontrold/2_mqtt.tmpl
+    echo '  mosquitto_pub -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PASSWORD -t /devices/$MQTT_TOPIC/controls/'${topic}' -m '$R'' >> /etc/vcontrold/2_mqtt.tmpl
     echo 'fi' >> /etc/vcontrold/2_mqtt.tmpl
 done
 
 # Configure vcontrold.xml with the user-specified values
-sed -i "s/#DEVICEID#/$config_deviceid/g" /etc/vcontrold/vcontrold.xml
-sed -i "s|#VITOXML#|$config_file_vito|g" /etc/vcontrold/vcontrold.xml
+sed -i "s/#DEVICEID#/$config_deviceid/g" "$config_file_vcontrold"
+sed -i "s|#VITOXML#|$config_file_vito|g" "$config_file_vcontrold"
 
 # Enable or disable debug mode based on user configuration
 if bashio::config.true 'debug'; then
-    sed -i "s/#DEBUG#/y/g" /etc/vcontrold/vcontrold.xml
+    sed -i "s/#DEBUG#/y/g" "$config_file_vcontrold"
 else
-    sed -i "s/#DEBUG#/n/g" /etc/vcontrold/vcontrold.xml
+    sed -i "s/#DEBUG#/n/g" "$config_file_vcontrold"
 fi
 
 # Start the vcontrold service or a dummy process for external control
 if [ "$VCONTROL_HOST" = "localhost" ]; then
     bashio::log.info "Starting local vcontrold..."
-
-    # Check if a custom config file2 is used and include -x option only if needed
-    if [ "$use_custom_config_file_vcontrold" = true ]; then
-        bashio::log.info "Using custom vcontrold.xml."
-        exec /usr/sbin/vcontrold -x "$config_file_vcontrold" -n -U root -d "$config_tty"
-    else
-        bashio::log.info "Using default vcontrold.xml."
-        exec /usr/sbin/vcontrold -n -U root -d "$config_tty"
-    fi
+    exec /usr/sbin/vcontrold -x "$config_file_vcontrold" -n -U root -d "$config_tty"
 else
     bashio::log.info "vcontrold is not running locally. Keeping process alive."
     tail -f /dev/null

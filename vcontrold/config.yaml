@@ -39,21 +39,21 @@ options:
     - getTempRaumNorSollM2:FLOAT
     - getTempRaumRedSollM1:FLOAT
     - getTempRaumRedSollM2:FLOAT
-    - getBetriebArtM2:FLOAT
+    - getBetriebArtM2:STRING
     - getLeistungIst:FLOAT
     - getTempAbgas:FLOAT
     - getBrennerStatus:FLOAT
     - getBrennerStarts:FLOAT
     - getBrennerStunden1:FLOAT
     - getBrennerStunden2:FLOAT
-    - getPumpeStatusM1:FLOAT
-    - getPumpeStatusSp:FLOAT
-    - getPumpeStatusZirku:FLOAT
-    - getPumpeStatusM2:FLOAT
+    - getPumpeStatusM1:STRING
+    - getPumpeStatusSp:STRING
+    - getPumpeStatusZirku:STRING
+    - getPumpeStatusM2:STRING
     - getMischerM1:FLOAT
     - getMischerM2:FLOAT
     - getMischerM3:FLOAT
-    - getUmschaltventil:FLOAT
+    - getUmschaltventil:STRING
     - getError0:STRING
     - getError1:STRING
     - getError2:STRING

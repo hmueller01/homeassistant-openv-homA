@@ -35,13 +35,13 @@
       <device ID="2053"/>
     </command>
     <!-- RAUMTEMPERATUR -->
-    <command name="getTempRaumM1" protocmd="getaddr" >
+    <command name="getTempRaumM1" protocmd="getaddr">
       <addr>0896</addr>
       <len>2</len>
       <unit>UT</unit>
       <description>Ermittle Raumtemperatur für ersten Heizkreis in Grad C</description>
     </command>
-    <command name="getTempRaumM2" protocmd="getaddr" >
+    <command name="getTempRaumM2" protocmd="getaddr">
       <addr>0898</addr>
       <len>2</len>
       <unit>UT</unit>
@@ -761,6 +761,7 @@
       <unit>PR</unit>
       <description>Ermittle Mischerposition M1</description>
       <device ID="2053"/>
+      <device ID="20CB"/>  <!-- Adresse unbekannt, SRV ERR: >FRAMER: ERROR address 254C code 1 -->
     </command>
     <command name="getMischerM2" protocmd="getaddr">
       <addr>354C</addr>
@@ -768,11 +769,7 @@
       <unit>PR</unit>
       <description>Ermittle Mischerposition M2</description>
       <device ID="2053"/>
-      <device ID="20CB">
-        <addr>354C</addr>
-        <len>1</len>
-        <unit>PR</unit>
-      </device>
+      <device ID="20CB"/> <!-- Adresse unbekannt, SRV ERR: >FRAMER: ERROR address 354C code 1 -->
     </command>
     <command name="getMischerM3" protocmd="getaddr">
       <addr>454C</addr>
@@ -780,6 +777,7 @@
       <unit>PR</unit>
       <description>Ermittle Mischerposition M3</description>
       <device ID="2053"/>
+      <device ID="20CB"/> <!-- Adresse unbekannt, SRV ERR: >FRAMER: ERROR address 454C code 1 -->
     </command>
     <!-- HEIZZEITEN -->
     <command name="getTimerM1Mo" protocmd="getaddr">

@@ -13,7 +13,7 @@ RUN \
 RUN \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y build-essential git cmake telnet libxml2-dev mosquitto-clients && \
+    apt-get install -y build-essential git cmake telnet libxml2-dev mosquitto-clients yq && \
     git clone --depth 1 --branch $VCONTROLD_VERSION https://github.com/openv/vcontrold.git && \
     cd vcontrold && \
     mkdir build && \

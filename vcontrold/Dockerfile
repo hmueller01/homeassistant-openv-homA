@@ -1,11 +1,12 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-ARG BUILD_FROM
+ARG BUILD_ARCH=aarch64
+ARG BUILD_FROM=ghcr.io/home-assistant/${BUILD_ARCH}-base-debian:bookworm
 FROM $BUILD_FROM
 
 ENV VCONTROLD_VERSION="v0.98.12"
 
 # Execute during the build of the image
-ARG TEMPIO_VERSION BUILD_ARCH
+ARG TEMPIO_VERSION=2021.09.0 BUILD_ARCH
 RUN \
     curl -sSLf -o /usr/bin/tempio \
     "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${BUILD_ARCH}"
@@ -21,8 +22,7 @@ RUN \
     cmake -DMANPAGES=OFF .. && \
     make install && \
     make clean && \
-    cd .. && \
-    cd .. && \
+    cd ../.. && \
     apt-get purge -y --auto-remove build-essential git cmake && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* vcontrold

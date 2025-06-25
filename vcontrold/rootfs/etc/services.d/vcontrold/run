@@ -53,36 +53,41 @@ rm -f /etc/vcontrold/1_mqtt_commands.txt /etc/vcontrold/2_mqtt.tmpl || true
 echo '#!/bin/sh' > /etc/vcontrold/2_mqtt.tmpl
 
 # Parse commands.yaml file and generate mqtt template file
-count=$(yq '.commands | length' "$config_file_commands")
-for ((i=0; i<count; i++)); do
-    cmd=$(yq -r ".commands[$i].command" "$config_file_commands")
-    type=$(yq -r ".commands[$i].type" "$config_file_commands")
-    topic=$(yq -r ".commands[$i].topic" "$config_file_commands")
-    if [[ $cmd == "" ]]; then
-        bashio::log.error "Command at index $i is empty. Please check your commands.yaml file."
+i=0
+while IFS=$'\t' read -r cmd type topic; do
+    ((i=i+1))
+    if [[ -z "$cmd" ]]; then
+         bashio::log.error "Command at index $i is empty. Please check your commands.yaml file."
         exit 1
     fi
-    if [[ $type == "" ]]; then
-        bashio::log.warning "Type for command at index $i is not set. Defaulting to STRING."
+    if [[ -z "$type" ]]; then
+        bashio::log.warning "Type at index $i for command ${cmd} is not set. Defaulting to STRING."
         type="STRING"
     fi
-    if [[ $topic == "" ]]; then
-        bashio::log.warning "Type for topic at index $i is not set. Defaulting to STRING."
-        topic='"$C'$i'"'
+    if [[ -z "$topic" ]]; then
+        bashio::log.warning "Topic at index $i is not set. Defaulting to ${cmd}."
+        topic="${cmd}"
     fi
+    topic='/devices/$MQTT_TOPIC/controls/'${topic}''
 
     bashio::log.info "Configuring command ${i}: ${cmd} with type ${type} using topic '${topic}'"
     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt
 
-    payload='$'$i''
-    if [[ $type == "STRING" ]]; then
+    if [[ $type == "FLOAT" ]]; then
+        payload='$(printf "%.1f" "$'$i'")'
+    elif [[ $type == "INT" ]]; then
+        payload='$(printf "%.0f" "$'$i'")'
+    elif [[ $type == "STRING" ]]; then
         payload='"$R'$i'"'
+    else
+        bashio::log.error "Unsupported type '${type}' for command ${cmd}. Supported types are FLOAT, INT, STRING."
+        exit 1
     fi
 
     echo 'if [ "x$E'$i'" = "xOK" ]; then' >> /etc/vcontrold/2_mqtt.tmpl
-    echo '  mosquitto_pub -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PASSWORD -t "/devices/$MQTT_TOPIC/controls/'${topic}'" -m "'${payload}'"' >> /etc/vcontrold/2_mqtt.tmpl
+    echo '  mosquitto_pub -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PASSWORD -t "'${topic}'" -m '${payload}'' >> /etc/vcontrold/2_mqtt.tmpl
     echo 'fi' >> /etc/vcontrold/2_mqtt.tmpl
-done
+done < <(yq -r '.commands[] | [.command, .type, .topic] | @tsv' "$config_file_commands")
 
 # Configure vcontrold.xml with the user-specified values
 sed -i "s/#DEVICEID#/$config_deviceid/g" "$config_file_vcontrold"

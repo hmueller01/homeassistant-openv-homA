@@ -74,6 +74,8 @@ while IFS=$'\t' read -r cmd type topic; do
     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt
 
     if [[ $type == "FLOAT" ]]; then
+        payload='$'$i''
+    elif [[ $type == "FLOAT1" ]]; then
         payload='$(printf "%.1f" "$'$i'")'
     elif [[ $type == "INT" ]]; then
         payload='$(printf "%.0f" "$'$i'")'

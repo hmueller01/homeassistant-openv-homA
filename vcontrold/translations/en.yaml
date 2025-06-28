@@ -35,3 +35,15 @@ configuration:
   commands:
     name: "Commands"
     description: "List of commands to send. (Format: `command1:TYPE,command2:TYPE` where `TYPE` must be `FLOAT` or `STRING`)"
+  homa_system_id:
+    name: "HomA System ID"
+    description: "HomA System ID (Format: `123456-vito`)"
+  homa_device:
+    name: "HomA Device"
+    description: "HomA device name (default: `Vito`)"
+  homa_room:
+    name: "HomA Room"
+    description: "HomA room name (default: `Sensors`)"
+  hass_area:
+    name: "Home Assistant Area"
+    description: "Home Assistant area name (default: `Vito`)"

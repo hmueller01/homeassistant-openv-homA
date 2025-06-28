@@ -5,17 +5,17 @@
 # ==============================================================================
 
 # Declare variables
-declare config_deviceid
-declare config_commands
 declare config_tty
-declare config_file_vito="/etc/vcontrold/vito.xml"
+declare config_deviceid
+declare config_systemid
+declare config_device
+declare config_room
+declare config_area
+declare config_areadeclare config_file_vito="/etc/vcontrold/vito.xml"
 declare config_file_vcontrold="/etc/vcontrold/vcontrold.xml"
 declare config_file_commands="/etc/vcontrold/commands.yaml"
 
-declare config_systemid="0-test" #"123456-vito"
-declare config_device="Vito"
-declare config_room="Sensors"
-declare config_area="Vito"
+
 
 # Fetch MQTT settings
 source /etc/services.d/get_mqtt_settings.sh
@@ -26,11 +26,10 @@ source /etc/services.d/get_vcontrold_settings.sh
 # Get configuration options from user
 config_tty=$(bashio::config 'tty')
 config_deviceid=$(bashio::config 'device_id')
-#config_commands=$(bashio::config 'commands')
-#config_systemid=$(bashio::config 'system_id')
-#config_device=$(bashio::config 'device')
-#config_room=$(bashio::config 'room')
-#config_area=$(bashio::config 'area')
+config_systemid=$(bashio::config 'homa_system_id')
+config_device=$(bashio::config 'homa_device')
+config_room=$(bashio::config 'homa_room')
+config_area=$(bashio::config 'hass_area')
 
 # Check if custom vito.xml file exists
 if [ -f "/config/vcontrold/vito.xml" ]; then
@@ -201,7 +200,7 @@ while IFS=$'\t' read -r cmd type topic class unit template; do
         bashio::log.warning "Topic at index $i is not set. Defaulting to ${cmd}."
         topic="${cmd}"
     fi
-    topic_tmpl=$(get_topic "controls" $topic)
+    topic_tmpl=$(get_topic "controls" "$topic")
 
     bashio::log.info "Configuring command ${i}: ${cmd} with type ${type} using topic '${topic_tmpl}'"
     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt

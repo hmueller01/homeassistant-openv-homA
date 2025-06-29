@@ -13,7 +13,7 @@ declare config_room
 declare config_area
 declare config_areadeclare config_file_vito="/etc/vcontrold/vito.xml"
 declare config_file_vcontrold="/etc/vcontrold/vcontrold.xml"
-declare config_file_commands="/etc/vcontrold/commands.yaml"
+#declare config_file_commands="/etc/vcontrold/commands.yaml"
 
 
 
@@ -48,16 +48,16 @@ else
 fi
 
 # Check if custom commands.yaml file exists
-if [ -f "/config/vcontrold/commands.yaml" ]; then
-    bashio::log.info "Using custom commands.yaml file."
-    config_file_commands="/config/vcontrold/commands.yaml"
-else
-    bashio::log.info "Using default commands.yaml file."
-fi
-if [ ! -f "$config_file_commands" ]; then
-    bashio::log.error "commands.yaml not found. Exit here."
-    exit 1
-fi
+# if [ -f "/config/vcontrold/commands.yaml" ]; then
+#     bashio::log.info "Using custom commands.yaml file."
+#     config_file_commands="/config/vcontrold/commands.yaml"
+# else
+#     bashio::log.info "Using default commands.yaml file."
+# fi
+# if [ ! -f "$config_file_commands" ]; then
+#     bashio::log.error "commands.yaml not found. Exit here."
+#     exit 1
+# fi
 
 
 # Create HomA topic string with up to 3 levels of hierarchy
@@ -178,16 +178,25 @@ mosquitto_pub -h "$MQTT_HOST" -p "$MQTT_PORT" -u "$MQTT_USER" -P "$MQTT_PASSWORD
 rm -f /etc/vcontrold/1_mqtt_commands.txt /etc/vcontrold/2_mqtt.tmpl || true
 echo '#!/bin/sh' > /etc/vcontrold/2_mqtt.tmpl
 
-# Parse commands.yaml file and generate mqtt template file
+# Parse commands of config data and generate mqtt template file
 i=0
-while IFS=$'\t' read -r cmd type topic class unit template; do
+commands_json=$(bashio::config 'commands')
+# This should be a JSON array: [{"command":"getTempRaumM2","type":"FLOAT1","topic":"Raumtemperatur","unit":"°C","class":"temperature"}, ...]
+# but for unknown reason is a JSON-Line format: {"command":"getTempRaumM2","type":"FLOAT1","topic":"Raumtemperatur","unit":"°C","class":"temperature"}
+# bashio::log.info "commands_json: $commands_json"
+while read -r line; do
     ((i=i+1))
-    cmd="${cmd#_}"  # Remove leading underscore
+    # line is a JSON-Line, e.g. {"command":"getTempRaumM2","type":"FLOAT1","topic":"Raumtemperatur","unit":"°C","class":"temperature"}
+    IFS=$'\t' read -r cmd type topic class unit template < <(echo "$line" | jq -r '"_" + 
+    (.command // "") + "\t_" + (.type // "") + "\t_" + (.topic // "") + "\t_" +
+    (.class // "") + "\t_" + (.unit // "") + "\t_" + (.template // "")')
+    cmd="${cmd#_}"  # Remove added leading underscore to avoid parameter shifting issues
     type="${type#_}"
     topic="${topic#_}"
     class="${class#_}"
     unit="${unit#_}"
     template="${template#_}"
+    # bashio::log.info "i=$i, cmd=$cmd, type=$type, topic=$topic, class=$class, unit=$unit, template=$template"
     if [[ -z "$cmd" ]]; then
          bashio::log.error "Command at index $i is empty. Please check your commands.yaml file."
         exit 1
@@ -202,7 +211,7 @@ while IFS=$'\t' read -r cmd type topic class unit template; do
     fi
     topic_tmpl=$(get_topic "controls" "$topic")
 
-    bashio::log.info "Configuring command ${i}: ${cmd} with type ${type} using topic '${topic_tmpl}'"
+    bashio::log.info "Configuring cmd ${i}: ${cmd} with type ${type} using topic '${topic_tmpl}'"
     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt
 
     if [[ $type == "FLOAT" ]]; then
@@ -238,14 +247,76 @@ while IFS=$'\t' read -r cmd type topic class unit template; do
 
     # Publish Home Assistant autoconfiguration message
     homeassistant_config "_$topic" "_$class" "_$unit" "_$template"
-done < <(yq -r '.commands[] | "_" +
-    (.command // "") + "\t_" +
-    (.type // "") + "\t_" +
-    (.topic // "") + "\t_" +
-    (.class // "") + "\t_" +
-    (.unit // "") + "\t_" +
-    (.template // "")' "$config_file_commands")
-    # needs a leading underscore to avoid parameter shifting issues
+done <<< "$commands_json"
+
+# Parse commands.yaml file and generate mqtt template file
+# i=0
+# while IFS=$'\t' read -r cmd type topic class unit template; do
+#     ((i=i+1))
+#     cmd="${cmd#_}"  # Remove leading underscore
+#     type="${type#_}"
+#     topic="${topic#_}"
+#     class="${class#_}"
+#     unit="${unit#_}"
+#     template="${template#_}"
+#     if [[ -z "$cmd" ]]; then
+#          bashio::log.error "Command at index $i is empty. Please check your commands.yaml file."
+#         exit 1
+#     fi
+#     if [[ -z "$type" ]]; then
+#         bashio::log.warning "Type at index $i for command ${cmd} is not set. Defaulting to STRING."
+#         type="STRING"
+#     fi
+#     if [[ -z "$topic" ]]; then
+#         bashio::log.warning "Topic at index $i is not set. Defaulting to ${cmd}."
+#         topic="${cmd}"
+#     fi
+#     topic_tmpl=$(get_topic "controls" "$topic")
+
+#     bashio::log.info "Configuring command ${i}: ${cmd} with type ${type} using topic '${topic_tmpl}'"
+#     echo $cmd >> /etc/vcontrold/1_mqtt_commands.txt
+
+#     if [[ $type == "FLOAT" ]]; then
+#         payload='$'$i''
+#     elif [[ $type == "FLOAT1" ]]; then
+#         payload='$(printf "%.1f" "$'$i'")'
+#     elif [[ $type == "INT" ]]; then
+#         payload='$(printf "%.0f" "$'$i'")'
+#     elif [[ $type == "STRING" ]]; then
+#         payload='"$R'$i'"'
+#     else
+#         bashio::log.error "Unsupported type '${type}' for command ${cmd}. Supported types are FLOAT, INT, STRING."
+#         exit 1
+#     fi
+
+#     echo 'if [ "x$E'$i'" = "xOK" ]; then' >> /etc/vcontrold/2_mqtt.tmpl
+#     echo '  mosquitto_pub -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PASSWORD -t "'${topic_tmpl}'" -m '${payload}'' >> /etc/vcontrold/2_mqtt.tmpl
+#     echo 'fi' >> /etc/vcontrold/2_mqtt.tmpl
+
+#     # Publish meta information for HomA integration
+#     mosquitto_pub -h "$MQTT_HOST" -p "$MQTT_PORT" -u "$MQTT_USER" -P "$MQTT_PASSWORD" \
+#         -t "$(get_topic controls "$topic" meta/type)" -m "text" #-r
+#     mosquitto_pub -h "$MQTT_HOST" -p "$MQTT_PORT" -u "$MQTT_USER" -P "$MQTT_PASSWORD" \
+#         -t "$(get_topic controls "$topic" meta/order)" -m "$i" #-r
+#     # Set unit if available
+#     if [[ -n "${unit}" ]]; then
+#         mosquitto_pub -h "$MQTT_HOST" -p "$MQTT_PORT" -u "$MQTT_USER" -P "$MQTT_PASSWORD" \
+#             -t "$(get_topic controls "$topic" meta/unit)" -m " $unit" #-r
+#     else
+#         mosquitto_pub -h "$MQTT_HOST" -p "$MQTT_PORT" -u "$MQTT_USER" -P "$MQTT_PASSWORD" \
+#             -t "$(get_topic controls "$topic" meta/unit)" -m "" #-r
+#     fi
+
+#     # Publish Home Assistant autoconfiguration message
+#     homeassistant_config "_$topic" "_$class" "_$unit" "_$template"
+# done < <(yq -r '.commands[] | "_" +
+#     (.command // "") + "\t_" +
+#     (.type // "") + "\t_" +
+#     (.topic // "") + "\t_" +
+#     (.class // "") + "\t_" +
+#     (.unit // "") + "\t_" +
+#     (.template // "")' "$config_file_commands")
+#     # needs a leading underscore to avoid parameter shifting issues
 
 # Configure vcontrold.xml with the user-specified values
 sed -i "s/#DEVICEID#/$config_deviceid/g" "$config_file_vcontrold"
